@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<!-- 
+source: https://gist.github.com/tanmaykm/5111225 
+-->
+<html>
+  <head>
+        <title>Land Fight</title>
+        <script>
+            
+            //先取得網址字串，假設此頁網址為「index.aspx?id=U001&name=GQSM」
+            var url = location.href;
+            //再來用去尋找網址列中是否有資料傳遞(QueryString)
+            if(url.indexOf('?')!=-1)
+            {
+                //之後去分割字串把分割後的字串放進陣列中
+                var ary1 = url.split('?');
+                //此時ary1裡的內容為：
+                //ary1[0] = 'playtime.html'，ary1[1] = 'team=red&name=player'
+                
+                //下一步把後方傳遞的每組資料各自分割
+                var ary2 = ary1[1].split('&');
+                //此時ary2裡的內容為：
+                //ary2[0] = 'team=red'，ary2[1] = 'name=player'
+                
+                //ary2[0]= "team=red"
+                //ary2[1]= "name=player"
+                //最後如果我們要找id的資料就直接取ary[0]下手，name的話就是ary[1]
+                console.log("ary2",ary2);
+                var team = ary2[0].split('=');
+                var teamIS = team[1];
+                console.log("ary2[0]",ary2[0]);
+                console.log("team:",team);
+
+                //最後如果我們要找id的資料就直接取ary[0]下手，name的話就是ary[1]
+                var name = ary2[1].split('=');
+                var nameIS = name.substr(5, 20);
+                console.log("ary2[1]",ary2[1]);
+                console.log("name:",name);
+                console.log("teamIS",teamIS,"nameIS:",nameIS);
+                // 目前 teamIS 更能正確分出紅藍隊, nameIS 能夠正確表示出玩家名稱
+            }
+            window.onload = function () {  // 等整個網頁 onload 完了之後再來執行這個 js 的 finction
+                console.log("In onload teamIS",teamIS,"nameIS:",nameIS);
+                GofindMyTeam(teamIS, nameIS);
+                function clientOnServer(use) {
+                    try {
+                        let host = "ws://localhost:4545/"; //設定socker server的ip:port
+                        /*if(window.location.hostname) {
+                            host = "ws://" + window.location.hostname + ":4545/";
+                        }*/
+
+                        s = new WebSocket(host); //建立socket元件
+                        //設定幾個主要事件
+                        s.onopen = function (e) { 
+                            if(use == "who") {
+                                console.log("132241561");
+                                s.send("newCountPl###");
+                            }else if(use == "play") {
+                                console.log("13224");
+                                s.send("START###SS");
+                            }else{
+                                console.log("attack"+use); //d##44
+                                s.send(use);
+                            }
+                        };
+                        //s.onclose = function (e) { log_msg("connection closed."); };
+                        //s.onerror = function (e) { log_msg("connection error."); };
+                        
+                        //當server送訊息來時
+                        s.onmessage = function (e) {
+                            strs = e.data.split('###');   //strs[0]: name   //  strs[1]: IN2
+                            console.log("msg comes", strs);
+                            if (strs[1][0] == "I") {
+                                console.log("132");
+                                playerReady(strs[0])
+                            }else if(strs[0] == "Play") {
+                                console.log("13222");
+                                location.href="playtime.html";
+                            }else if(strs[1] == "WHO_RES") {
+                                console.log("132222222");
+                                id = "player" + strs[0];
+                                let d = document.getElementById(id);
+                                d.innerHTML = "I am this team!";
+                            }else {   // if(strs[0] == 數字) 代表是來佔位子的 //（位置###值）
+                                let pos = document.getElementById(strs[0]+"w");
+                                pos.innerHTML = strs[1];
+                                if (strs[1] > 0){
+                                    pos.style.color = "white";
+                                    pos.style.backgroundColor = "red";
+                                }else if (strs[1] < 0){
+                                    pos.style.color = "white";
+                                    pos.style.backgroundColor = "blue";
+                                }
+                            }
+                            console.log(strs[0]+":" + strs[1]);
+
+                        };
+                    } catch (ex) {
+                        console.log("connection exception:" + ex);
+                    }
+                }
+            }
+            function clientOnServer(use) {
+                try {
+                    let host = "ws://localhost:4545/"; //設定socker server的ip:port
+                    /*if(window.location.hostname) {
+                        host = "ws://" + window.location.hostname + ":4545/";
+                    }*/
+
+                    s = new WebSocket(host); //建立socket元件
+                    //設定幾個主要事件
+                    s.onopen = function (e) { 
+                        if(use == "who") {
+                            console.log("132241561");
+                            s.send("newCountPl###");
+                        }else if(use == "play") {
+                            console.log("13224");
+                            s.send("START###SS");
+                        }else{
+                            console.log("attack"+use); //d##44
+                            s.send(use);
+                        }
+                    };
+                    //s.onclose = function (e) { log_msg("connection closed."); };
+                    //s.onerror = function (e) { log_msg("connection error."); };
+                    
+                    //當server送訊息來時
+                    s.onmessage = function (e) {
+                        strs = e.data.split('###');   //strs[0]: name   //  strs[1]: IN2
+                        console.log("msg comes", strs);
+                        if (strs[1][0] == "I") {
+                            console.log("132");
+                            playerReady(strs[0])
+                        }else if(strs[0] == "Play") {
+                            console.log("13222");
+                            location.href="playtime.html";
+                        }else if(strs[1] == "WHO_RES") {
+                            console.log("132222222");
+                            id = "player" + strs[0];
+                            let d = document.getElementById(id);
+                            d.innerHTML = "I am this team!";
+                        }else {   // if(strs[0] == 數字) 代表是來佔位子的 //（位置###值）
+                            let pos = document.getElementById(strs[0]+"w");
+                            pos.innerHTML = strs[1];
+                            if (strs[1] > 0){
+                                pos.style.color = "white";
+                                pos.style.backgroundColor = "red";
+                            }else if (strs[1] < 0){
+                                pos.style.color = "white";
+                                pos.style.backgroundColor = "blue";
+                            }else if (strs[1] == 0){
+                                pos.style.color = "black";
+                                pos.style.backgroundColor = "white";
+                            }
+                        }
+                    };
+                } catch (ex) {
+                    console.log(ex);
+                }
+            }
+            function attack(pos) {
+                cm = nameIS+"###"+pos;
+                console.log(cm);
+                clientOnServer(cm);
+            }
+            function GofindMyTeam(team, name) {
+                console.log("In find teamIS",team,"nameIS:",name);
+                if (team == "red") {
+                    console.log("Inred");
+                    console.log(team);
+                    let playerONE = document.getElementById("pTeam");
+                    playerONE.innerHTML = "red";
+                    playerONE.style.color = "red";
+                }else if(team =="blue") {
+                    console.log("Inblue");
+                    let playerTWO = document.getElementById("pTeam");
+                    playerTWO.innerHTML = "blue";
+                    playerTWO.style.color = "blue";
+                }
+                let playerNameIs = document.getElementById("pName");
+                playerNameIs.innerHTML = name;
+            }
+
+            var s; //socket object for connection
+
+            function sendMsg() {
+                inputBox = document.getElementById('message');
+                s.send(inputBox.value);
+                inputBox.value = "";
+            }
+        </script>
+    </head>
+<body>
+    <h1 align="center">Start Land Fight</h1>
+    <hr>
+    <tr>
+        <td><span style="color:red;">Player1: redteam</span></td><br>
+        <td><span style="color:blue;">Player2: blueteam</span></td><br><hr>
+        <td>your name is : <span id="pName"></span></td><br>
+        <td>your team is : <span id="pTeam"></span></td><br>
+    </tr>
+    <tr>
+        <td id="player1"></td>
+        <td id="player2"></td>
+    </tr>
+    <br><br>
+    <table style="border:3px #cccccc solid;" cellpadding="10" border='1' width="500" height="500" align="center">
+        <tr>
+            <td id="00" onclick="attack(00)"><span id="00w">0</span></td>
+            <td id="01" onclick="attack(01)"><span id="01w">0</span></td>
+            <td id="02" onclick="attack(02)"><span id="02w">0</span></td>
+            <td id="03" onclick="attack(03)"><span id="03w">0</span></td>
+            <td id="04" onclick="attack(04)"><span id="04w">0</span></td>
+        </tr>
+        <tr>
+            <td id="10" onclick="attack(10)"><span id="10w">0</span></td>
+            <td id="11" onclick="attack(11)"><span id="11w">0</span></td>
+            <td id="12" onclick="attack(12)"><span id="12w">0</span></td>
+            <td id="13" onclick="attack(13)"><span id="13w">0</span></td>
+            <td id="14" onclick="attack(14)"><span id="14w">0</span></td>
+        </tr>
+        <tr>
+            <td id="20" onclick="attack(20)"><span id="20w">0</span></td>
+            <td id="21" onclick="attack(21)"><span id="21w">0</span></td>
+            <td id="22" onclick="attack(22)"><span id="22w">0</span></td>
+            <td id="23" onclick="attack(23)"><span id="23w">0</span></td>
+            <td id="24" onclick="attack(24)"><span id="24w">0</span></td>
+        </tr>
+        <tr>
+            <td id="30" onclick="attack(30)"><span id="30w">0</span></td>
+            <td id="31" onclick="attack(31)"><span id="31w">0</span></td>
+            <td id="32" onclick="attack(32)"><span id="32w">0</span></td>
+            <td id="33" onclick="attack(33)"><span id="33w">0</span></td>
+            <td id="34" onclick="attack(34)"><span id="34w">0</span></td>
+        </tr>
+        <tr>
+            <td id="40" onclick="attack(40)"><span id="40w">0</span></td>
+            <td id="41" onclick="attack(41)"><span id="41w">0</span></td>
+            <td id="42" onclick="attack(42)"><span id="42w">0</span></td>
+            <td id="43" onclick="attack(43)"><span id="43w">0</span></td>
+            <td id="44" onclick="attack(44)"><span id="44w">0</span></td>
+        </tr>
+    </table>
+    <h3 id="messages"></h3>
+    <script>
+        setTimeout(function(){
+            var redTeamget = 0;  // 計算紅隊擁有（佔地）區塊
+            var blueTeamget = 0;  // 計算藍隊擁有（佔地）區塊
+            for(var i=0;i <=4; i++){
+                for(var j=0;j <=4; j++){
+                    var pos = i.toString() + j.toString()+"w";
+                    let block = document.getElementById(pos);
+                    console.log("pos:",pos);
+                    console.log("css:",block.style.backgroundColor);
+                    if (block.style.backgroundColor == "red") {
+                        redTeamget = redTeamget + 1;
+                    }else if  (block.style.backgroundColor == "blue") {
+                        blueTeamget = blueTeamget + 1;
+                    }
+                }
+            }
+            if (redTeamget > blueTeamget){
+                let msg = document.getElementById("messages");
+                msg.innerHTML = "red team wins!!";
+            }else if (blueTeamget > redTeamget){
+                let msg = document.getElementById("messages");
+                msg.innerHTML = "blue team wins!!";
+            }else if (blueTeamget == redTeamget){
+                let msg = document.getElementById("messages");
+                msg.innerHTML = "no winer everyone is good";
+            }
+        },30000)  // 30 sec
+    </script>
+</body>
+</html>

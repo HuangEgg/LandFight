@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<!-- 
+source: https://gist.github.com/tanmaykm/5111225 
+-->
+<html>
+  <head>
+        <title>Land Fight Palyer Prepare</title>
+        <style>
+			#messages {
+				border: dotted 1px #444444;
+				font: 12px arial,sans-serif;
+			}
+			
+			#messages > p {
+				padding: 0px;
+				margin: 0px;
+			}
+		</style>
+        <script>
+            function changeState(player) {
+                console.log(player);
+                name = document.getElementById("player"+player+"Name").value;
+                if (player == '1') {
+                    console.log(name);
+                    let div1Name = document.getElementById("playerOneName");
+                    div1Name.style.color = "red";
+                    div1Name.style.fontSize = 20+"px";
+                    div1Name.innerHTML = name;
+                    let div1State = document.getElementById("player1state");
+                    div1State.innerHTML = "ok!";
+                } else if (player == "2") {
+                    console.log(name);
+                    let div2Name = document.getElementById("playerTwoName");
+                    div2Name.style.color = "blue";
+                    div2Name.style.fontSize = 20+"px";
+                    div2Name.innerHTML=name;
+                    let div2State = document.getElementById("player2state");
+                    div2State.innerHTML = "ok!";
+                }
+                clientOnServer("player"+player+"Name","Login");
+            }
+            function log_msg(msg) {
+                var p = document.createElement("p");
+                p.innerHTML = msg;
+                messages.appendChild(p);
+            }
+            var s; //socket object for connection
+            function clientOnServer(nameToSer,use) {
+                try {
+                    let host = "ws://localhost:4545/"; //設定socker server的ip:port
+                    /*if(window.location.hostname) {
+                        host = "ws://" + window.location.hostname + ":4545/";
+                    }*/
+
+                    s = new WebSocket(host); //建立socket元件
+                    //設定幾個主要事件
+                    s.onopen = function (e) { 
+                        if(use == "Login") {
+                            log_msg("connected...");
+                            nickname= document.getElementById(nameToSer).value;
+                            s.send("Ready###"+nickname)
+                        }else if(use == "play") {
+                            console.log("13224");
+                            s.send("START###SS")
+                        }
+                    };
+                    s.onclose = function (e) { log_msg("connection closed."); };
+                    s.onerror = function (e) { log_msg("connection error."); };
+                    
+                    //當server送訊息來時
+                    s.onmessage = function (e) {
+                        strs = e.data.split('###');   //strs[0]: name   //  strs[1]: IN2
+                        console.log("有收到", strs[0]);
+                        if (strs[1][0] == "I") {
+                            console.log("132");
+                            playerReady(strs[0])
+                        }else if(strs[0] == "Play") {
+                            console.log("13222");
+                            let does1here = document.getElementById("player1Name").value;
+                            let does2here = document.getElementById("player2Name").value;
+                            console.log("does1here:",does1here);
+                            console.log("does2here:",does1here);
+                            if (does1here != "") {
+                                location.href="playtime.html?team=red&name="+does1here;
+                            }else if(does2here != "") {
+                                location.href="playtime.html?team=blue&name="+does2here;
+                            }
+                        }
+                        log_msg(strs[0]+":" + strs[1]);
+                    };
+                } catch (ex) {
+                    log_msg("connection exception:" + ex);
+                }
+            }
+            function playerReady(nameList) {
+                pos = nameList.indexOf("#");   // 一個名字pos=-1,兩個名字pos=3
+                AllName = nameList.split("");
+                let     name = [];
+                console.log(nameList, pos);
+                console.log(AllName);
+                console.log(name);
+                s = ""
+                for(var t=0;t<AllName.length;t++) {
+                    if(AllName[t] != "#") {
+                        s = s + AllName[t];
+                    }else{
+                        name.push(s);
+                        s = ""
+                    }
+                }
+                name.push(s);
+                //name.push(AllName[0:pos]);
+               // name.push(AllName[pos+1:]);
+                for (var i = 0; i < name.length; i++) {
+                    if (i == 0) {
+                        console.log(name);
+                        let div1Name = document.getElementById("playerOneName");
+                        div1Name.innerHTML = name[0];
+                        let div1State = document.getElementById("player1state");
+                        div1State.innerHTML = "ok!";
+                    } else if (i == 1) {
+                        console.log(name);
+                        let div2Name = document.getElementById("playerTwoName");
+                        div2Name.innerHTML=name[1];
+                        let div2State = document.getElementById("player2state");
+                        div2State.innerHTML = "ok!";
+                    }
+                }
+                
+            }
+            function sendMsg() {
+                inputBox = document.getElementById('message');
+                s.send(inputBox.value);
+                inputBox.value = "";
+            }
+            
+        </script>
+    </head>
+<body>
+    <h1 align="center">Land Fight</h1>
+    <hr>
+        Player1 nickname:<input type="text" id="player1Name">
+        <button onclick="changeState('1')">Ready!!</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Player2 nickname:<input type="text" id="player2Name">
+        <button onclick="changeState(2)">Ready!!</button>
+    <br><br>
+    <table style="border:3px #cccccc solid;" cellpadding="10" border='1'>
+        <tr>
+          <td>player</td>
+          <td>name</td>
+          <td>ready?</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td id="playerOneName"></td>
+          <td id="player1state">X</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td id="playerTwoName"></td>
+          <td id="player2state">X</td>
+        </tr>
+    </table>
+    <button onclick="clientOnServer(0,'play')">GOGO!</button>
+    <hr>
+    <div id="messages"></div> 
+</body>
+</html>

@@ -44,9 +44,9 @@ async def handler(websocket, path):
             else :
                 listPos1 = int(msg[1][0:1])
                 listPos2 = int(msg[1][1:2])
-            print("1:",type(msg[0]),type(msg[1]))
-            print(listPos1,"//",listPos2)
-            print(game[listPos1][listPos2])
+            #print("1:",type(msg[0]),type(msg[1]))
+            #print(listPos1,"//",listPos2)
+            #print(game[listPos1][listPos2])
             # msg[1] = msg[1]  # 將要準備查找 game 的 索引值 變成 str 形態
             if msg[0] == playerName[0]:   # player1 預設是+1
                 game[listPos1][listPos2] = game[listPos1][listPos2] + 1

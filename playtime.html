@@ -44,7 +44,7 @@ source: https://gist.github.com/tanmaykm/5111225
                 GofindMyTeam(teamIS, nameIS);
                 function clientOnServer(use) {
                     try {
-                        let host = "ws://localhost:4545/"; //設定socker server的ip:port
+                        let host = "ws://10.107.47.43:4545/"; //設定socker server的ip:port
                         /*if(window.location.hostname) {
                             host = "ws://" + window.location.hostname + ":4545/";
                         }*/
@@ -102,7 +102,7 @@ source: https://gist.github.com/tanmaykm/5111225
             }
             function clientOnServer(use) {
                 try {
-                    let host = "ws://localhost:4545/"; //設定socker server的ip:port
+                    let host = "ws://10.107.47.43:4545/"; //設定socker server的ip:port
                     /*if(window.location.hostname) {
                         host = "ws://" + window.location.hostname + ":4545/";
                     }*/
@@ -267,7 +267,7 @@ source: https://gist.github.com/tanmaykm/5111225
                 msg.innerHTML = "blue team wins!!";
             }else if (blueTeamget == redTeamget){
                 let msg = document.getElementById("messages");
-                msg.innerHTML = "no winer everyone is good";
+                msg.innerHTML = "no winner everyone is good";
             }
         },30000)  // 30 sec
     </script>
